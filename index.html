@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listinha para Bosses</title>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --card-bg: #202024;
+            --text-color: #e1e1e6;
+            --primary: #8257e5;
+            --process-color: #d4a373;
+            --done-color: #04d361;
+            --danger-color: #e63946;
+            --border-color: #323238;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 750px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        /* Controles Superiores */
+        .top-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .reset-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 14px;
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .reset-btn:active { transform: scale(0.98); }
+
+        /* Controles de Adição e Ordenação */
+        .action-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        #newBossInput {
+            flex: 1;
+            padding: 12px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #newBossInput:focus {
+            border-color: var(--primary);
+        }
+
+        .action-btn {
+            padding: 0 18px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            border-color: var(--primary);
+            background-color: rgba(130, 87, 229, 0.1);
+        }
+
+        .action-btn:active { transform: scale(0.95); }
+
+        /* Filtros */
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .filter-btn {
+            flex: 1;
+            padding: 12px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            border-color: var(--primary);
+            background-color: rgba(130, 87, 229, 0.1);
+            color: var(--primary);
+        }
+
+        /* Lista e Cards */
+        .boss-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .boss-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--card-bg);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 6px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .boss-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Controles do lado esquerdo (X e Setas) */
+        .left-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--danger-color); /* X Vermelho */
+            padding: 4px;
+            opacity: 0.6;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .btn-delete:hover {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        .order-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .btn-order {
+            background: none;
+            border: none;
+            color: #8d8d99;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .btn-order:hover {
+            background-color: var(--border-color);
+            color: white;
+        }
+
+        .boss-name {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+
+        /* Botões de Ação (Status) */
+        .buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: opacity 0.2s, transform 0.1s, background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn:active { transform: scale(0.95); }
+
+        .btn-process { color: var(--process-color); border: 2px solid var(--process-color); background: transparent; }
+        .btn-done { color: var(--done-color); border: 2px solid var(--done-color); background: transparent; }
+        .btn-died { color: var(--danger-color); border: 2px solid var(--danger-color); background: transparent; }
+
+        /* ESTADOS ATIVOS */
+        .status-process { border-left-color: var(--process-color); background-color: rgba(212, 163, 115, 0.1); }
+        .status-process .btn-process { background-color: var(--process-color); color: #000; }
+
+        .status-done { border-left-color: var(--done-color); background-color: rgba(4, 211, 97, 0.1); opacity: 0.7; }
+        .status-done .boss-name { text-decoration: line-through; color: #8d8d99; }
+        .status-done .btn-done { background-color: var(--done-color); color: #000; }
+
+        .status-died { border-left-color: var(--danger-color); background-color: rgba(230, 57, 70, 0.1); }
+        .status-died .boss-name { text-decoration: line-through; color: var(--danger-color); }
+        .status-died .btn-died { background-color: var(--danger-color); color: white; }
+
+        /* Responsividade */
+        @media (max-width: 650px) {
+            .boss-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .buttons {
+                width: 100%;
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+            .btn {
+                flex: 1;
+                justify-content: center;
+                min-width: 90px;
+            }
+            .filter-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>⚔️ Tibia Daily Bosses</h1>
+        
+        <div class="top-controls">
+            <button class="reset-btn" onclick="resetAll()">
+                ⚠️ Resetar Progresso Diário
+            </button>
+
+            <div class="action-group">
+                <input type="text" id="newBossInput" placeholder="Nome do novo boss...">
+                <button class="action-btn" onclick="addBoss()" title="Adicionar Boss">➕</button>
+                <button class="action-btn" onclick="sortAlphabetically()" title="Restaurar Ordem Alfabética">🔤</button>
+            </div>
+
+            <div class="filter-group">
+                <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">Todos</button>
+                <button class="filter-btn" id="filter-pending" onclick="setFilter('pending')">Não Feitos</button>
+                <button class="filter-btn" id="filter-done" onclick="setFilter('done')">Feitos</button>
+            </div>
+        </div>
+
+        <ul class="boss-list" id="bossList">
+            </ul>
+    </div>
+
+    <script>
+        // Array original base
+        const defaultBosses = [
+            "Brainhead", "Despor", "Drume", "Dukes", "Faceless", 
+            "GT Svar", "Irgix the Flimsy", "Kingzelos", "Kusuma", 
+            "Last DC", "Lulu", "Magma", "Mini DC", "Mitmah", 
+            "Monster", "Oberon", "Ratmiral", "Tentugly", "Timira", 
+            "Warlock", "Warzone 1-6", "WZ9"
+        ];
+
+        const bossListElement = document.getElementById('bossList');
+        let currentFilter = 'all';
+
+        function loadData() {
+            const savedStatus = localStorage.getItem('tibiaBossStatus');
+            const savedOrder = localStorage.getItem('tibiaBossOrder');
+            
+            return {
+                status: savedStatus ? JSON.parse(savedStatus) : {},
+                order: savedOrder ? JSON.parse(savedOrder) : [...defaultBosses]
+            };
+        }
+
+        const appData = loadData();
+        let bossStatus = appData.status;
+        let bossOrder = appData.order;
+
+        function saveData() {
+            localStorage.setItem('tibiaBossStatus', JSON.stringify(bossStatus));
+            localStorage.setItem('tibiaBossOrder', JSON.stringify(bossOrder));
+        }
+
+        function addBoss() {
+            const input = document.getElementById('newBossInput');
+            const newBoss = input.value.trim();
+
+            if (!newBoss) {
+                alert("Digite o nome do boss para adicionar!");
+                return;
+            }
+
+            if (bossOrder.some(b => b.toLowerCase() === newBoss.toLowerCase())) {
+                alert("Este boss já está na lista!");
+                return;
+            }
+
+            bossOrder.push(newBoss);
+            saveData();
+            renderBosses();
+            input.value = '';
+            input.focus();
+        }
+
+        document.getElementById('newBossInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addBoss();
+        });
+
+        function sortAlphabetically() {
+            if (confirm("Deseja reorganizar sua lista inteira em ordem alfabética?")) {
+                bossOrder.sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
+                saveData();
+                renderBosses();
+            }
+        }
+
+        function removeBoss(bossName) {
+            if (confirm(`Tem certeza que deseja remover "${bossName}" da sua lista permanentemente?`)) {
+                bossOrder = bossOrder.filter(b => b !== bossName);
+                delete bossStatus[bossName];
+                saveData();
+                renderBosses();
+            }
+        }
+
+        function toggleStatus(bossName, status) {
+            if (bossStatus[bossName] === status) {
+                delete bossStatus[bossName];
+            } else {
+                bossStatus[bossName] = status;
+            }
+            saveData();
+            renderBosses();
+        }
+
+        function moveBoss(bossName, direction) {
+            const index = bossOrder.indexOf(bossName);
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= bossOrder.length) return;
+
+            const temp = bossOrder[index];
+            bossOrder[index] = bossOrder[newIndex];
+            bossOrder[newIndex] = temp;
+
+            saveData();
+            renderBosses();
+        }
+
+        function setFilter(filterType) {
+            currentFilter = filterType;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`filter-${filterType}`).classList.add('active');
+            renderBosses();
+        }
+
+        function resetAll() {
+            if (confirm("Tem certeza que deseja resetar o checklist de hoje?")) {
+                bossStatus = {};
+                saveData();
+                renderBosses();
+            }
+        }
+
+        function renderBosses() {
+            bossListElement.innerHTML = ''; 
+
+            const bossesToRender = bossOrder.filter(boss => {
+                if (currentFilter === 'done') return bossStatus[boss] === 'done';
+                if (currentFilter === 'pending') return bossStatus[boss] !== 'done';
+                return true; 
+            });
+
+            bossesToRender.forEach((boss) => {
+                const li = document.createElement('li');
+                li.className = 'boss-item';
+                
+                if (bossStatus[boss] === 'process') li.classList.add('status-process');
+                else if (bossStatus[boss] === 'done') li.classList.add('status-done');
+                else if (bossStatus[boss] === 'died') li.classList.add('status-died');
+
+                // Variável para injetar as setinhas de ordem apenas se o filtro for "Todos"
+                const orderControlsHTML = currentFilter === 'all' ? `
+                    <div class="order-controls">
+                        <button class="btn-order" onclick="moveBoss('${boss}', -1)" title="Subir">▲</button>
+                        <button class="btn-order" onclick="moveBoss('${boss}', 1)" title="Descer">▼</button>
+                    </div>
+                ` : '';
+
+                li.innerHTML = `
+                    <div class="boss-info">
+                        <div class="left-actions">
+                            <button class="btn-delete" onclick="removeBoss('${boss}')" title="Remover Boss">✖</button>
+                            ${orderControlsHTML}
+                        </div>
+                        <span class="boss-name">${boss}</span>
+                    </div>
+                    <div class="buttons">
+                        <button class="btn btn-process" onclick="toggleStatus('${boss}', 'process')">⏳ Em Processo</button>
+                        <button class="btn btn-died" onclick="toggleStatus('${boss}', 'died')">💀 Morri</button>
+                        <button class="btn btn-done" onclick="toggleStatus('${boss}', 'done')">✔️ Feito</button>
+                    </div>
+                `;
+                bossListElement.appendChild(li);
+            });
+        }
+
+        renderBosses();
+    </script>
+
+</body>
+</html>
